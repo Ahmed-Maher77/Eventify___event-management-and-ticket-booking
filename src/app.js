@@ -2,6 +2,8 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import dns from "node:dns/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import {
@@ -18,6 +20,8 @@ import eventRoutes from "./routes/eventRoutes.js";
 dns.setServers(["8.8.8.8"]);
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Swagger configuration
 const swaggerOptions = {
@@ -75,6 +79,8 @@ app.use("/api", apiLimiter);
 // Swagger documentation route
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Serve static files from the files directory
+app.use("/files", express.static(path.join(__dirname, "..", "files")));
 // Basic route
 app.get("/", (req, res) => {
   res.json({
