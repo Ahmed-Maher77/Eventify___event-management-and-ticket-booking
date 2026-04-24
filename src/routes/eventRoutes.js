@@ -11,6 +11,7 @@ import {
     validateUpdateEvent,
 } from "../utils/validators.js";
 import { authorize, protect } from "../middlewares/authMiddleware.js";
+import { uploadImage } from "../config/multerConfig.js";
 
 
 const router = Router();
@@ -29,6 +30,7 @@ router.post(
     "/",
     protect,
     authorize(["admin"]),
+    uploadImage.single("image"),
     validateCreateEvent,
     createEvent,
 );
@@ -39,6 +41,7 @@ router.put(
     "/:id",
     protect,
     authorize(["admin"]),
+    uploadImage.single("image"),
     validateUpdateEvent,
     updateEvent,
 );
