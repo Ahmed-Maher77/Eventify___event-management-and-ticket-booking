@@ -5,12 +5,17 @@ import User from '../models/User.js';
 // Load environment variables
 dotenv.config({ path: './.env' });
 
+// command: 
+    // node src/scripts/seedAdmin.js <adminEmail> <adminPassword> <adminName>
+    // or: node src/scripts/seedAdmin.js
 const seedAdmin = async () => {
     try {
         // Admin account details
-        const adminEmail = 'admin@eventify.com';
-        const adminPassword = 'Admin@123';
-        const adminName = 'Eventify Admin';
+        const adminEmail = process.argv[2] || 'admin@eventify.com';
+        const adminPassword = process.argv[3] || 'Admin@123';
+        const adminName = process.argv[4] || 'Eventify Admin';
+
+        console.log(adminEmail, adminPassword, adminName);
 
         // Connect to database
         await mongoose.connect(process.env.MONGO_URI);
