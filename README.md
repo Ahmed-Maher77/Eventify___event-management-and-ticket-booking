@@ -1,6 +1,6 @@
 # Eventify API
 
-Eventify is a Node.js REST API for event management and ticket booking. It supports user authentication, role-based access control, event CRUD, booking management, rate limiting, structured logging, and interactive API documentation.
+Eventify is a Node.js REST API for event management and ticket booking. It supports user authentication, role-based access control, event CRUD, booking management, image uploads (Multer + Cloudinary), rate limiting, structured logging, and interactive API documentation.
 
 ## Features
 
@@ -9,6 +9,11 @@ Eventify is a Node.js REST API for event management and ticket booking. It suppo
 - Event management with create, read, update, and delete operations
 - Booking workflow for reserving, viewing, and cancelling bookings
 - Admin booking oversight and booking status management
+- Event image handling with three options:
+  - `imageUrl` (external direct URL)
+  - file upload via `multipart/form-data` + Multer (`image` field)
+  - automatic placeholder fallback (`/files/images/event-placeholder.svg`)
+- Cloudinary external media storage for uploaded event images
 - Pagination, filtering, search, and sorting on list endpoints
 - Centralized validation, error handling, and request logging
 - Swagger/OpenAPI documentation and Bruno collections for API testing
@@ -22,6 +27,8 @@ Eventify is a Node.js REST API for event management and ticket booking. It suppo
 - bcryptjs for password hashing
 - express-validator for input validation
 - express-rate-limit for abuse protection
+- Multer for multipart file handling
+- Cloudinary for external image storage
 - Swagger UI for API documentation
 - Jest for testing
 - Supertest for HTTP endpoint testing
@@ -36,12 +43,15 @@ docs/
 src/
   app.js                 Express app setup
   server.js              Server entry point
-  config/                Database and app configuration
+  config/                Database and app configuration (db, multer, cloudinary)
   controllers/           Request handlers
   middlewares/           Auth, validation, logging, error handling
   models/                Mongoose schemas
   routes/                API route definitions
-  utils/                 Validation and JWT helpers
+  utils/                 Validation, JWT, and Cloudinary upload helpers
+files/
+  images/
+    event-placeholder.svg Default local placeholder image
 tests/
   setup.js               Shared test environment setup
   integration/
@@ -67,17 +77,19 @@ npm install
 
 ### Environment Variables
 
-Create a `.env` file in the project root and define the required variables for your environment. A typical local setup looks like this:
+Create a `.env` file in the project root and define the required variables for your environment.
 
 ```env
-PORT=3000
-NODE_ENV=development
-MONGO_URI=mongodb://127.0.0.1:27017/eventify
+MONGO_URI=mongodb://localhost:27017/eventify
+PORT=5000
 JWT_SECRET=your_secret_key
 JWT_EXPIRES_IN=7d
+CLOUDINARY_CLOUD_NAME=djpxtccbf
+CLOUDINARY_API_KEY=792738921521235
+CLOUDINARY_API_SECRET=_oMEEDdPYxk_kMZRi4FvSrN0auI
 ```
 
-If your implementation uses additional values for seeded accounts or deployment, add them here as needed.
+If your implementation uses additional values for seeded accounts or deployment, add them here as needed. For production, rotate secrets and never commit sensitive credentials.
 
 ### Run the Project
 
@@ -114,6 +126,25 @@ The OpenAPI fragments live in `docs/swagger`, and the Bruno collection is availa
 - `POST /api/events` - Create an event (admin only)
 - `PUT /api/events/:id` - Update an event (admin only)
 - `DELETE /api/events/:id` - Delete an event (admin only)
+
+#### Event image upload behavior
+
+- Create/update routes accept `multipart/form-data` with file field name: `image`
+- The route middleware uses `uploadImage.single("image")`
+- If file is uploaded, backend uploads it to Cloudinary and stores:
+  - `image`: Cloudinary `secure_url`
+  - `imagePublicId`: Cloudinary `public_id` for later cleanup
+- If `imageUrl` is provided in body, it is used directly (and previous Cloudinary image is removed on update)
+- If neither `image` nor `imageUrl` is provided, the model default is used:
+  - `/files/images/event-placeholder.svg`
+- On event delete, Cloudinary image is removed automatically if `imagePublicId` exists
+
+#### Event model updates
+
+`Event` now includes:
+
+- `image` (`String`) with default `/files/images/event-placeholder.svg`
+- `imagePublicId` (`String | null`) for Cloudinary asset lifecycle management
 
 ### Bookings
 
