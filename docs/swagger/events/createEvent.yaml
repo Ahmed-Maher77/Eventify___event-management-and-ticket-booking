@@ -9,7 +9,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               required:
@@ -59,6 +59,15 @@ paths:
                   minimum: 0
                   description: Event price (can be 0 for free events)
                   example: 50.00
+                image:
+                  type: string
+                  format: binary
+                  description: Optional image file uploaded with key `image` (Multer + Cloudinary)
+                imageUrl:
+                  type: string
+                  format: uri
+                  description: Optional direct image URL. If provided without file, this URL is used.
+                  example: "https://example.com/event-cover.jpg"
       responses:
         '201':
           description: Event created successfully

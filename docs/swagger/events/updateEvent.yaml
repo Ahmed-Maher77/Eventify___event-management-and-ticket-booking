@@ -16,7 +16,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -58,6 +58,15 @@ paths:
                   minimum: 0
                   description: Event price
                   example: 75.00
+                image:
+                  type: string
+                  format: binary
+                  description: Optional replacement image file uploaded with key `image` (Multer + Cloudinary)
+                imageUrl:
+                  type: string
+                  format: uri
+                  description: Optional direct image URL. If provided, backend uses it and clears previous Cloudinary public id.
+                  example: "https://example.com/new-event-cover.jpg"
       responses:
         '200':
           description: Event updated successfully

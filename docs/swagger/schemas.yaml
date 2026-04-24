@@ -115,6 +115,15 @@ components:
           default: upcoming
           description: Event status
           example: "upcoming"
+        image:
+          type: string
+          description: Event cover image URL (Cloudinary URL, direct image URL, or placeholder path)
+          example: "https://res.cloudinary.com/demo/image/upload/v1/eventify/events/sample.jpg"
+        imagePublicId:
+          type: string
+          nullable: true
+          description: Cloudinary public_id used for lifecycle operations (delete/replace). Null for non-Cloudinary images.
+          example: "eventify/events/sample"
         createdBy:
           type: object
           description: Event creator user reference
