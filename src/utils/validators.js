@@ -126,15 +126,14 @@ const validateCreateEvent = [
 ];
 
   const validateUpdateEvent = [
-    ensureEventBody,
     (req, res, next) => {
-      const updatableFields = ['title', 'description', 'date', 'location', 'category', 'capacity', 'price'];
+      const updatableFields = ['title', 'description', 'date', 'location', 'category', 'capacity', 'price', 'imageUrl'];
       const hasAtLeastOneField = updatableFields.some((field) =>
         Object.prototype.hasOwnProperty.call(req.body, field),
       );
 
-      if (!hasAtLeastOneField) {
-        throw AppError.badRequest('At least one field (title, description, date, location, category, capacity, price) must be provided for update');
+      if (!hasAtLeastOneField && !req.file) {
+        throw AppError.badRequest('At least one field (title, description, date, location, category, capacity, price, imageUrl) or an image file must be provided for update');
       }
 
       next();
@@ -178,6 +177,11 @@ const validateCreateEvent = [
     body('price')
       .optional()
       .isFloat({ min: 0 }).withMessage('Price must be a non-negative number'),
+
+    body('imageUrl')
+      .optional()
+      .trim()
+      .isURL().withMessage('imageUrl must be a valid URL'),
 
     handleValidationErrors
   ];
